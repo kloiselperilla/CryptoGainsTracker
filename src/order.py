@@ -4,7 +4,7 @@ from price_history import PriceHistory
 
 
 class Order:
-    def __init__(self, currency, volume: float, date: datetime, ord_type, price: float, price_hist: PriceHistory):
+    def __init__(self, currency, volume: float, date: datetime, ord_type, price: float):
         self.currency = currency
         self.volume = volume
         self.date = date
@@ -12,7 +12,7 @@ class Order:
         # self.proceeds = None
         self.type = ord_type
         self.price = price
-        self.diff = 0
+        self.used_up = 0
 
     @property
     def cost_basis(self):
@@ -27,7 +27,7 @@ class Order:
             price = float(row['Price'])
         else:
             price = price_hist[date.strftime('%Y-%m-%d')]
-        return cls(currency, volume, date, type, price, price_hist)
+        return cls(currency, volume, date, type, price)
 
     def __str__(self):
-        return f'[{self.date}] - {self.type} {self.currency}: {self.volume} (diff: {self.diff})'
+        return f'[{self.date}] - {self.type} {self.currency}: {self.volume} (used up: {self.used_up})'
