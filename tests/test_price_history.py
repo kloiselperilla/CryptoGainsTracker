@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 import mock
 import pytest
 
@@ -9,25 +10,6 @@ class TestingPriceHistory(PriceHistory):
     def __init__(self, interval):
         self.history_dict = {}
         self.date_format = self._date_format_for_interval(interval)
-
-
-# # @mock.patch('builtins.open')
-# # @mock.patch('price_history.HistoricalData')
-# class TestGetItem:
-#     def test_field_dict_is_queried_with_proper_date_format(self):
-#         ph = TestingPriceHistory()
-#         # How would I idiomatically test that it uses the proper
-#         # date format without tying the test too much to implementation?
-#         ph.history_dict[]
-
-#         pass
-
-
-@mock.patch('price_history.HistoricalData')
-class TestSetItem:
-    def test_field_dict_stores_price_with_proper_date_format(self, mock_history):
-        # I think I'll just mock out _get_history
-        pass
 
 
 @mock.patch('price_history.PriceHistory._get_history')
@@ -71,17 +53,37 @@ class TestInit:
         with pytest.raises(Exception):
             PriceHistory('BTC-USD', 1234)
 
+    @mock.patch('builtins.open', mock.mock_open(read_data=json.dumps({'a': 'b'})))
     def test_use_file_history_if_exists(self, mock_history):
-        pass
+        ph = PriceHistory('BTC-USD', ONE_HOUR)
 
-    def test_use_crypto_data_api_if_file_dne(self, mock_history):
-        pass
+        assert ph.history_dict['a'] == 'b'
 
-    def test_saves_file_after_crypto_api(self, mock_history):
-        pass
+    @mock.patch('builtins.open', side_effect=FileNotFoundError)
+    @mock.patch('price_history.PriceHistory._save_history')
+    def test_use_crypto_data_api_if_file_dne(self, mock_save, mock_open, mock_history):
+        row_a = mock.MagicMock()
+        date_a = datetime.strptime('2018-06-29 00:00:00', '%Y-%m-%d %H:%M:%S')
+        row_a.name = date_a
 
-    def test_dict_keys_use_one_day_format(self, mock_history):
-        pass
+        row_a.__getitem__.return_value = 123.4
+        row_b = mock.MagicMock()
+        date_b = datetime.strptime('2018-06-30 00:00:00', '%Y-%m-%d %H:%M:%S')
+        row_b.name = date_b
+        row_b.__getitem__.return_value = 234.5
+        iter_dummy = [(0, row_a), (1, row_b)]
+        mock_history.return_value.retrieve_data.return_value.iterrows.return_value = iter_dummy
 
-    def test_dict_keys_use_one_hour_format(self, mock_history):
-        pass
+        ph = PriceHistory('BTC-USD', ONE_HOUR)
+
+        assert ph[date_a] == 123.4
+        assert ph[date_b] == 234.5
+
+    # def test_saves_file_after_crypto_api(self, mock_history, mock_open):
+    #     pass
+
+    # def test_dict_keys_use_one_day_format(self, mock_history, mock_open):
+    #     pass
+
+    # def test_dict_keys_use_one_hour_format(self, mock_history, mock_open):
+    #     pass

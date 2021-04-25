@@ -10,8 +10,6 @@ FILE_FORMAT = '{currency_pair}_{interval}_data.json'
 class PriceHistory:
     def __init__(self, currency_pair, interval, start='2017-01-01-00-00'):
         # new = HistoricalData('BTC-USD',86400,'2017-01-01-00-00').retrieve_data()
-        print('HISTORY FUNCTION')
-        print(self._get_history)
         self.currency_pair = currency_pair
         self.interval = interval
         self.date_format = self._date_format_for_interval(interval)
@@ -42,8 +40,10 @@ class PriceHistory:
             hist = {}
             for index, row in dat.iterrows():
                 hist[row.name.strftime(self.date_format)] = row['close']
-            with open(path_name, 'w') as fp:
-                json.dump(hist, fp)
+            self._save_history(hist, path_name)
             history_dict = hist
         return history_dict
 
+    def _save_history(self, history, path_name):
+        with open(path_name, 'w') as fp:
+            json.dump(history, fp)
