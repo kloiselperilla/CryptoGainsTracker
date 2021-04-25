@@ -12,6 +12,8 @@ historic-crypto = "*"
 [dev-packages]
 pycodestyle = "*"
 ipykernel = "*"
+mock = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.9"

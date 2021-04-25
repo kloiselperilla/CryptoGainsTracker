@@ -5,40 +5,20 @@ from enum import Enum
 from collections import deque
 from functools import reduce
 from datetime import datetime, date
+from Historic_Crypto import HistoricalData
 
+from form_8949_row import Form8949Row
+from order import Order
+from price_history import PriceHistory
 
 BTC_ORDERS_CSV = 'btc-orders.csv'
 HISTORICAL_DATA = 'btc_by_date.json'
 
 
-class Order:
-    def __init__(self, currency, volume, date, type, price):
-        self.currency = currency
-        self.volume = volume
-        self.date = date
-        self.type = type
-        self.price = price
-        self.diff = 0
-
-    @classmethod
-    def init_class(cls, hist_data):
-        with open(hist_data) as f:
-            print('Loading BTC historical prices')
-            cls.btc_by_date = json.load(f)
-
-    @classmethod
-    def from_row(cls, row, currency):
-        volume = float(row['BTC Volume'])
-        date = datetime.strptime(row['Date'], '%Y-%m-%d %H:%M:%S +0000')
-        type = row['BTC Buy/Sell']
-        if row['Ticker'] == 'BTC' and row['Currency'] == 'USD':
-            price = float(row['Price'])
-        else:
-            price = cls.btc_by_date[date.strftime('%Y-%m-%d')]
-        return cls(currency, volume, date, type, price)
-
-    def __str__(self):
-        return f'[{self.date}] - {self.type} {self.currency}: {self.volume} (diff: {self.diff})'
+def populate_historical_data(interval, start='2017-01-01-00-00'):
+    # new = HistoricalData('BTC-USD',86400,'2017-01-01-00-00').retrieve_data()
+    new = HistoricalData('BTC-USD', interval, '2017-01-01-00-00').retrieve_data()
+    pass
 
 
 def calculate_gains(buy, sell, gains_dict, diff=0, verbose=False):
