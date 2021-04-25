@@ -28,9 +28,9 @@ def add_year(d):
         according to https://www.naspp.com/Blog/March-2016/Tax-Holding-Periods-and-Leap-Year
     """
     if d.month == 2 and d.day >= 28:
-        return d.replace(year=d.year + 1, month=3, day=1)
+        return d.replace(year=d.year + 1, month=3, day=1, hour=0, minute=0, second=0)
     else:
-        return d.replace(year=d.year + 1) + timedelta(days=1)
+        return d.replace(year=d.year + 1, hour=0, minute=0, second=0) + timedelta(days=1)
 
 
 def calculate_gains(buy, sell, gains_dict, diff=0, verbose=False):
@@ -48,11 +48,11 @@ def calculate_gains(buy, sell, gains_dict, diff=0, verbose=False):
     buy_worth = volume_in_sale * buy.price
     sell_worth = volume_in_sale * sell.price
     gain = sell_worth - buy_worth
-    long = sell.date > add_year(buy.date)
+    long_term = sell.date >= add_year(buy.date)
     if verbose:
         print('Volume in sale:', volume_in_sale)
         print(f'Sold {sell} from {buy}: gains = {gain}')
-    if long:
+    if long_term:
         gains_dict['long'] += gain
     else:
         gains_dict['short'] += gain
