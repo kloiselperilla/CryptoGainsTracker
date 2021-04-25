@@ -30,9 +30,11 @@ class TestSetItem:
         pass
 
 
+@mock.patch('price_history.PriceHistory._get_history')
 class TestGetSet:
-    def test_getting_set_items_matches_for_rounded_dates_with_day_interval(self):
-        ph = TestingPriceHistory(ONE_DAY)
+    def test_getting_set_items_matches_for_rounded_dates_with_day_interval(self, mock_get_hist):
+        mock_get_hist.return_value = {}
+        ph = PriceHistory('BTC-USD', ONE_DAY)
         date_a = datetime.strptime('2018-06-29 00:00:00', '%Y-%m-%d %H:%M:%S')
         date_b = datetime.strptime('2019-03-10 00:00:00', '%Y-%m-%d %H:%M:%S')
         expected_a = 123.4
@@ -46,8 +48,21 @@ class TestGetSet:
         assert expected_a == actual_a
         assert expected_b == actual_b
 
-    def test_getting_set_items_matches_for_rounded_dates_with_hour_interval(self):
-        pass
+    def test_getting_set_items_matches_for_rounded_dates_with_hour_interval(self, mock_get_hist):
+        mock_get_hist.return_value = {}
+        ph = PriceHistory('BTC-USD', ONE_HOUR)
+        date_a = datetime.strptime('2018-06-29 02:00:00', '%Y-%m-%d %H:%M:%S')
+        date_b = datetime.strptime('2018-06-29 05:00:00', '%Y-%m-%d %H:%M:%S')
+        expected_a = 123.4
+        expected_b = 432.1
+        ph[date_a] = expected_a
+        ph[date_b] = expected_b
+
+        actual_a = ph[date_a]
+        actual_b = ph[date_b]
+
+        assert expected_a == actual_a
+        assert expected_b == actual_b
 
 
 @mock.patch('price_history.HistoricalData')
