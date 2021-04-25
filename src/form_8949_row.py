@@ -9,4 +9,5 @@ class Form8949Row:
     type
     gains
     """
-    pass
+    def __init__(self):
+        pass

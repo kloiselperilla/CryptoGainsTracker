@@ -1,10 +1,11 @@
 import csv
 import math
 import json
+from calendar import monthrange
 from enum import Enum
 from collections import deque
 from functools import reduce
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from Historic_Crypto import HistoricalData
 
 from form_8949_row import Form8949Row
@@ -21,14 +22,18 @@ def populate_historical_data(interval, start='2017-01-01-00-00'):
     pass
 
 
+def add_year(d):
+    """
+        Add amount of time for long-term capital gains
+        according to https://www.naspp.com/Blog/March-2016/Tax-Holding-Periods-and-Leap-Year
+    """
+    if d.month == 2 and d.day >= 28:
+        return d.replace(year=d.year + 1, month=3, day=1)
+    else:
+        return d.replace(year=d.year + 1) + timedelta(days=1)
+
+
 def calculate_gains(buy, sell, gains_dict, diff=0, verbose=False):
-    def addYears(d, years):
-        try:
-            # Return same day of the current year
-            return d.replace(year=d.year + years)
-        except ValueError:
-            # If not same day, it will return other, i.e.  February 29 to March 1 etc.
-            return d + (date(d.year + years, 1, 1) - date(d.year, 1, 1))
     if diff:
         if buy.diff:
             print()
@@ -43,7 +48,7 @@ def calculate_gains(buy, sell, gains_dict, diff=0, verbose=False):
     buy_worth = volume_in_sale * buy.price
     sell_worth = volume_in_sale * sell.price
     gain = sell_worth - buy_worth
-    long = sell.date > addYears(buy.date, 1)
+    long = sell.date > add_year(buy.date)
     if verbose:
         print('Volume in sale:', volume_in_sale)
         print(f'Sold {sell} from {buy}: gains = {gain}')
