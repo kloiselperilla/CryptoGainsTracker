@@ -131,3 +131,9 @@ if __name__ == "__main__":
             orders.append(Order.from_row(row, 'BTC', ph))
     form_rows = populate_form_8949_rows(orders)
     form_rows_to_csv(form_rows)
+
+# TODO: Try out with more data to see if long-terms kick in
+# TODO: Generalize currency code to use more than BTC
+# TODO: Get individual gains tables for each crypto
+# TODO (stretch): Allow for passing in all trades and spitting out all gains
+#   This would require counting a crypto-crypto as a buy for one and a sell for the other at once
