@@ -34,8 +34,10 @@ class PriceHistory:
         path_name = FILE_FORMAT.format(currency_pair=currency_pair, interval=interval)
         try:
             with open(path_name) as f:
+                print('Using saved data')
                 history_dict = json.load(f)
         except FileNotFoundError:
+            print('No save data found\nPulling data...')
             dat = HistoricalData(currency_pair, interval, start).retrieve_data()
             hist = {}
             for index, row in dat.iterrows():

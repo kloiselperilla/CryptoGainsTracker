@@ -26,7 +26,8 @@ class Order:
         if row['Ticker'] == 'BTC' and row['Currency'] == 'USD':
             price = float(row['Price'])
         else:
-            price = price_hist[date.strftime('%Y-%m-%d')]
+            # price = price_hist[date.strftime('%Y-%m-%d')]
+            price = price_hist[date]
         return cls(currency, volume, date, type, price)
 
     def __str__(self):

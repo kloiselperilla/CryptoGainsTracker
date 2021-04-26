@@ -13,13 +13,6 @@ from order import Order
 from price_history import PriceHistory, ONE_HOUR
 
 BTC_ORDERS_CSV = 'btc-orders.csv'
-# HISTORICAL_DATA = 'btc_by_date.json'
-
-
-# def populate_historical_data(interval, start='2017-01-01-00-00'):
-#     # new = HistoricalData('BTC-USD',86400,'2017-01-01-00-00').retrieve_data()
-#     new = HistoricalData('BTC-USD', interval, '2017-01-01-00-00').retrieve_data()
-#     pass
 
 
 def add_year(d):
@@ -31,25 +24,6 @@ def add_year(d):
         return d.replace(year=d.year + 1, month=3, day=1, hour=0, minute=0, second=0)
     else:
         return d.replace(year=d.year + 1, hour=0, minute=0, second=0) + timedelta(days=1)
-
-
-# def calculate_gains(buy, sell, gains_dict, diff=0, verbose=False):
-#     if diff:
-#         volume_in_sale = diff
-#         buy.used_up += diff
-#     else:
-#         volume_in_sale = buy.volume - buy.used_up
-#     buy_worth = volume_in_sale * buy.price
-#     sell_worth = volume_in_sale * sell.price
-#     gain = sell_worth - buy_worth
-#     long_term = sell.date >= add_year(buy.date)
-#     if verbose:
-#         print('Volume in sale:', volume_in_sale)
-#         print(f'Sold {sell} from {buy}: gains = {gain}')
-#     if long_term:
-#         gains_dict['long'] += gain
-#     else:
-#         gains_dict['short'] += gain
 
 
 def calculate_row(buy, sell, gains_dict, diff=0, verbose=False):
@@ -76,33 +50,6 @@ def calculate_row(buy, sell, gains_dict, diff=0, verbose=False):
     row = Form8949Row('BTC', volume_in_sale, buy.date, sell.date, buy_worth,
                       sell_worth, gains_type, gain)
     return row
-
-
-# def process_orders(orders):
-#     earlier = 0
-#     later = 0
-#     diff = 0
-#     capital_gains = {
-#         'long': 0,
-#         'short': 0,
-#     }
-#     while later < len(orders):
-#         if orders[later].type == 'SELL':
-#             amt_sold = orders[later].volume
-#             match_bought_accum = 0
-#             while earlier < later and match_bought_accum < amt_sold:
-#                 if orders[earlier].type == 'BUY':
-#                     current_bought = orders[earlier].volume - orders[earlier].diff
-#                     if match_bought_accum + current_bought > amt_sold:
-#                         diff = amt_sold - match_bought_accum
-#                         calculate_gains(orders[earlier], orders[later], capital_gains, diff)
-#                         break
-#                     else:
-#                         match_bought_accum += current_bought
-#                         calculate_gains(orders[earlier], orders[later], capital_gains)
-#                 earlier += 1
-#         later += 1
-#     return capital_gains
 
 
 def populate_form_8949_rows(orders, verbose=False):
@@ -147,13 +94,40 @@ def populate_form_8949_rows(orders, verbose=False):
     return rows
 
 
+def form_rows_to_csv(form_rows: list[Form8949Row], timeframe=None):
+    fieldnames = ['Asset', 'Volume', 'Date Acquired', 'Date Sold', 'Cost Basis',
+                  'Proceeds', 'Gains']
+    if not timeframe:
+        fieldnames.append('Gains Timeframe')
+        csv_file_name = 'btc_gains_all.csv'
+    else:
+        csv_file_name = 'btc_gains_{timeframe}.csv'
+
+    with open(csv_file_name, mode='w') as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        writer.writeheader()
+        for r in form_rows:
+            if not timeframe or timeframe == r.gains_type:
+                write_row_dict = {
+                    'Asset': r.currency,
+                    'Volume': r.volume,
+                    'Date Acquired': r.date_acquired,
+                    'Date Sold': r.date_sold,
+                    'Cost Basis': r.cost_basis,
+                    'Proceeds': r.proceeds,
+                    'Gains': r.gains,
+                }
+                if not timeframe:
+                    write_row_dict['Gains Timeframe'] = r.gains_type
+                writer.writerow(write_row_dict)
+
+
 if __name__ == "__main__":
-    # Order.init_class(HISTORICAL_DATA)
     ph = PriceHistory('BTC-USD', ONE_HOUR)
     orders = []
     with open(BTC_ORDERS_CSV, newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            orders.append(Order.from_row(row, 'BTC'))
-    print(process_orders(orders))
+            orders.append(Order.from_row(row, 'BTC', ph))
     form_rows = populate_form_8949_rows(orders)
+    form_rows_to_csv(form_rows)
