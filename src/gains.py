@@ -132,6 +132,7 @@ if __name__ == "__main__":
     form_rows = populate_form_8949_rows(orders)
     form_rows_to_csv(form_rows)
 
+# TODO: Total gains calculation
 # TODO: Try out with more data to see if long-terms kick in
 # TODO: Generalize currency code to use more than BTC
 # TODO: Get individual gains tables for each crypto
