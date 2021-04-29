@@ -122,6 +122,10 @@ def form_rows_to_csv(form_rows: list[Form8949Row], timeframe=None):
                 writer.writerow(write_row_dict)
 
 
+def total_gains(rows):
+    return sum(map(lambda r: r.gains, rows))
+
+
 if __name__ == "__main__":
     ph = PriceHistory('BTC-USD', ONE_HOUR)
     orders = []
@@ -132,9 +136,10 @@ if __name__ == "__main__":
     form_rows = populate_form_8949_rows(orders)
     form_rows_to_csv(form_rows)
 
-# TODO: Total gains calculation
 # TODO: Try out with more data to see if long-terms kick in
 # TODO: Generalize currency code to use more than BTC
 # TODO: Get individual gains tables for each crypto
+# TODO: Separate by date_sold by year
+# TODO: Add rounding to csv (satoshi, cents, Wei, etc)
 # TODO (stretch): Allow for passing in all trades and spitting out all gains
 #   This would require counting a crypto-crypto as a buy for one and a sell for the other at once
