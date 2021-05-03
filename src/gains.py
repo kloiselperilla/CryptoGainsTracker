@@ -136,6 +136,8 @@ if __name__ == "__main__":
     form_rows = populate_form_8949_rows(orders)
     form_rows_to_csv(form_rows)
 
+# TODO: Support for directly using bitcoin.tax-formatted csv files
+# TODO: Verify that orders are ordered by date
 # TODO: Try out with more data to see if long-terms kick in
 # TODO: Generalize currency code to use more than BTC
 # TODO: Get individual gains tables for each crypto
@@ -143,3 +145,6 @@ if __name__ == "__main__":
 # TODO: Add rounding to csv (satoshi, cents, Wei, etc)
 # TODO (stretch): Allow for passing in all trades and spitting out all gains
 #   This would require counting a crypto-crypto as a buy for one and a sell for the other at once
+# TODO (stretch): Aggregate csv files into one ordered Order list (ordered by date)
+# TODO (stretch): Convert Binance/kucoin/etc. history into readable csv (or just into orders)
+#   Maybe a directory to look in, and then intelligently get the right info from each csv file
